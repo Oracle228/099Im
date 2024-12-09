@@ -1,0 +1,616 @@
+<html><head><base href="." />
+<meta charset="UTF-8">
+<title>Image Editor & Gallery</title>
+<style>
+:root {
+  --primary: #00b4d8;
+  --dark: #0096c7;
+  --light: #caf0f8;
+  --text: #2b2d42;
+  --bg: #0a0a0a;
+  --card-bg: #1a1a1a;
+  --hover: #48cae4;
+}
+
+@keyframes animatedGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: var(--bg);
+  color: white;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, 
+    rgba(10,10,10,1), 
+    rgba(0,180,216,0.15), 
+    rgba(10,10,10,1));
+  background-size: 300% 300%;
+  animation: animatedGradient 8s ease infinite;
+  z-index: -1;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.upload-section {
+  background: rgba(26, 26, 26, 0.8);
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3),
+              0 0 0 1px rgba(255,255,255,0.1);
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
+}
+
+h2 {
+  color: transparent;
+  background: linear-gradient(45deg, #ffffff, var(--primary), var(--light), #ffffff);
+  background-size: 300% 300%;
+  animation: titleGradient 4s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  margin-bottom: 20px;
+  font-weight: 500;
+  text-shadow: none;
+}
+
+@keyframes titleGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.canvas-container {
+  position: relative;
+  margin: 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,180,216,0.3);
+}
+
+canvas {
+  border-radius: 12px;
+  background: transparent;
+}
+
+.tools {
+  margin: 15px 0;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(45deg, 
+    #ffffff,
+    var(--primary), 
+    var(--light),
+    #ffffff);
+  background-size: 300% 300%;
+  border-radius: 10px;
+  z-index: -1;
+  animation: titleGradient 4s ease infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  filter: blur(4px);
+}
+
+button:hover::before {
+  opacity: 1;
+}
+
+@keyframes borderGlow {
+  0% {
+    filter: blur(4px) brightness(1.2);
+    background-position: 0% 50%;
+  }
+  50% {
+    filter: blur(4px) brightness(1.5);
+    background-position: 100% 50%;
+  }
+  100% {
+    filter: blur(4px) brightness(1.2);
+    background-position: 0% 50%;
+  }
+}
+
+button:hover {
+  background: var(--hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,180,216,0.4);
+}
+
+input[type="file"] {
+  background: var(--card-bg);
+  padding: 10px;
+  border-radius: 8px;
+  color: var(--light);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+input[type="color"] {
+  height: 40px;
+  width: 60px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+}
+
+input[type="range"] {
+  width: 150px;
+  height: 8px;
+  border-radius: 4px;
+  -webkit-appearance: none;
+  background: var(--dark);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 15px rgba(0,180,216,0.6);
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.gallery-item {
+  background: rgba(26, 26, 26, 0.8);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.gallery-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,180,216,0.2);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.gallery-item .actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.gallery-item .actions button {
+  padding: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-item .actions button svg {
+  transition: transform 0.3s ease;
+}
+
+.gallery-item .actions button:hover svg {
+  transform: scale(1.2);
+}
+
+.copy-link {
+  display: none;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4ade80;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  animation: fadeOut 3s forwards;
+  box-shadow: 0 4px 20px rgba(74,222,128,0.4);
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; transform: translateY(0); }
+  70% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.footer-section {
+  margin-top: 50px;
+  padding: 30px;
+  background: rgba(26, 26, 26, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+}
+
+.footer-content {
+  display: grid;
+  gap: 30px;
+}
+
+.ad-space {
+  padding: 20px;
+  background: rgba(10, 10, 10, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.ad-placeholder {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 180, 216, 0.1);
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.ad-placeholder p {
+  color: rgba(255,255,255,0.6);
+  font-size: 1.2em;
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.info-block {
+  padding: 20px;
+  background: rgba(10, 10, 10, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.info-block h3 {
+  color: var(--primary);
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+.info-block ul, 
+.info-block ol {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.info-block li {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.info-block p {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-section {
+    padding: 20px;
+  }
+  
+  .info-section {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="upload-section">
+    <h2>Image Editor</h2>
+    <input type="file" id="imageUpload" accept="image/*">
+    
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+    </div>
+    
+    <div class="tools">
+      <button id="drawMode">Draw Mode</button>
+      <input type="color" id="colorPicker" value="#000000">
+      <input type="range" id="lineWidth" min="1" max="50" value="5">
+      <button id="save">Save Image</button>
+      <button id="getLink">Get Link</button>
+      <button id="clear">Clear Canvas</button>
+    </div>
+  </div>
+
+  <h2>Gallery</h2>
+  <div id="gallery" class="gallery"></div>
+
+  <footer class="footer-section">
+    <div class="footer-content">
+      <div class="ad-space">
+        <h3>Advertisement Space</h3>
+        <div class="ad-placeholder">
+          <!-- Ad content would go here -->
+          <p>Your Ad Could Be Here</p>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <div class="info-block">
+          <h3>About Image Editor</h3>
+          <p>Our free online image editor allows you to:</p>
+          <ul>
+            <li>Upload and edit images directly in your browser</li>
+            <li>Draw and annotate on your images</li>
+            <li>Save edited images to your device</li>
+            <li>Share images via direct links</li>
+            <li>Keep track of your editing history in the gallery</li>
+          </ul>
+        </div>
+        
+        <div class="info-block">
+          <h3>How to Use</h3>
+          <ol>
+            <li>Upload an image using the file picker</li>
+            <li>Use Draw Mode to add annotations</li>
+            <li>Adjust color and line width as needed</li>
+            <li>Save your work or get a shareable link</li>
+            <li>Find your previous work in the gallery below</li>
+          </ol>
+        </div>
+        
+        <div class="info-block">
+          <h3>Features</h3>
+          <ul>
+            <li>Free to use</li>
+            <li>No registration required</li>
+            <li>Works on all modern browsers</li>
+            <li>Local storage for your gallery</li>
+            <li>Responsive design</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<div id="copyNotification" class="copy-link">Link copied to clipboard!</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const imageUpload = document.getElementById('imageUpload');
+const drawModeBtn = document.getElementById('drawMode');
+const colorPicker = document.getElementById('colorPicker');
+const lineWidthInput = document.getElementById('lineWidth');
+const saveBtn = document.getElementById('save');
+const getLinkBtn = document.getElementById('getLink');
+const clearBtn = document.getElementById('clear');
+const gallery = document.getElementById('gallery');
+
+let isDrawing = false;
+let drawMode = false;
+let currentImage = null;
+
+// Set initial canvas size
+canvas.width = 800;
+canvas.height = 600;
+
+// Drawing event listeners
+canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mouseup', stopDrawing);
+canvas.addEventListener('mouseout', stopDrawing);
+
+function startDrawing(e) {
+  if (!drawMode) return;
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  ctx.beginPath();
+  ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function draw(e) {
+  if (!isDrawing || !drawMode) return;
+  const rect = canvas.getBoundingClientRect();
+  ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+  ctx.strokeStyle = colorPicker.value;
+  ctx.lineWidth = lineWidthInput.value;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+}
+
+function stopDrawing() {
+  isDrawing = false;
+}
+
+drawModeBtn.addEventListener('click', () => {
+  drawMode = !drawMode;
+  drawModeBtn.textContent = drawMode ? 'Cancel Draw' : 'Draw Mode';
+  canvas.style.cursor = drawMode ? 'crosshair' : 'default';
+});
+
+clearBtn.addEventListener('click', () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (currentImage) {
+    drawImageToCanvas(currentImage);
+  }
+});
+
+imageUpload.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        currentImage = img;
+        drawImageToCanvas(img);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+function drawImageToCanvas(img) {
+  const ratio = Math.min(canvas.width / img.width, canvas.height / img.height);
+  const centerX = (canvas.width - img.width * ratio) / 2;
+  const centerY = (canvas.height - img.height * ratio) / 2;
+  
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, centerX, centerY, img.width * ratio, img.height * ratio);
+}
+
+saveBtn.addEventListener('click', () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  addToGallery(dataUrl);
+  
+  const link = document.createElement('a');
+  link.download = 'edited-image.png';
+  link.href = dataUrl;
+  link.click();
+});
+
+getLinkBtn.addEventListener('click', () => {
+  const dataUrl = canvas.toDataURL('image/png');
+  navigator.clipboard.writeText(dataUrl).then(() => {
+    const notification = document.getElementById('copyNotification');
+    notification.style.display = 'block';
+    setTimeout(() => {
+      notification.style.display = 'none';
+    }, 3000);
+  });
+});
+
+function addToGallery(dataUrl) {
+  const galleryItem = document.createElement('div');
+  galleryItem.className = 'gallery-item';
+  
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  
+  // Delete button with icon
+  const deleteBtn = document.createElement('button');
+  deleteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+  </svg>`;
+  deleteBtn.title = "Delete";
+  deleteBtn.onclick = () => galleryItem.remove();
+  
+  // Save button with icon
+  const saveBtn = document.createElement('button');
+  saveBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+    <polyline points="7 3 7 8 15 8"></polyline>
+  </svg>`;
+  saveBtn.title = "Save";
+  saveBtn.onclick = () => {
+    const link = document.createElement('a');
+    link.download = 'gallery-image.png';
+    link.href = dataUrl;
+    link.click();
+  };
+  
+  // Copy link button with icon
+  const copyBtn = document.createElement('button');
+  copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>`;
+  copyBtn.title = "Copy Link";
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(dataUrl).then(() => {
+      const notification = document.getElementById('copyNotification');
+      notification.style.display = 'block';
+      setTimeout(() => {
+        notification.style.display = 'none';
+      }, 3000);
+    });
+  };
+  
+  actions.appendChild(deleteBtn);
+  actions.appendChild(saveBtn);
+  actions.appendChild(copyBtn);
+  galleryItem.appendChild(img);
+  galleryItem.appendChild(actions);
+  gallery.appendChild(galleryItem);
+  
+  const images = JSON.parse(localStorage.getItem('gallery') || '[]');
+  images.push(dataUrl);
+  localStorage.setItem('gallery', JSON.stringify(images));
+}
+
+function loadGallery() {
+  const images = JSON.parse(localStorage.getItem('gallery') || '[]');
+  images.forEach(dataUrl => addToGallery(dataUrl));
+}
+
+loadGallery();
+</script>
+</body></html>
